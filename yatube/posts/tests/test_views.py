@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from posts.models import Comment, Group, Post, User
+from posts.models import Follow, Comment, Group, Post, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -27,6 +27,8 @@ class PostsPagesTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='post_author')
+        cls.new_user = User.objects.create_user(username='new_author')
+        cls.second_user = User.objects.create_user(username='second_author')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test-slug',
@@ -180,6 +182,33 @@ class PostsPagesTests(TestCase):
             self.post_another.group.title
         )
 
+    def test_follow_and_unfollow_works_good(self):
+        """пользователь может подписываться на пользователей и удалять их."""
+        Follow.objects.create(author=self.new_user, user=self.user)
+        counter = Follow.objects.filter(user=self.user).count()
+        Follow.objects.create(author=self.second_user, user=self.user)
+        counter_follow = Follow.objects.filter(user=self.user).count()
+        self.assertEqual(counter_follow, counter + 1)
+        Follow.objects.filter(author=self.second_user, user=self.user).delete()
+        counter_unfollow = Follow.objects.filter(user=self.user).count()
+        self.assertEqual(counter_unfollow, counter)
+
+    def test_follow_page_show_correct_posts(self):
+        """В шаблон follow передаются сообщения follower."""
+        Follow.objects.create(author=self.new_user, user=self.user)
+        post_new = Post.objects.create(
+            author=self.new_user,
+            text='Новый тестовый пост follow',
+            group=self.group_another,
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(
+            response.context['page_obj'][0].author.username,
+            post_new.author.username
+        )
+        self.assertEqual(
+            response.context['page_obj'][0].text, post_new.text)
+
     def test_index_page_cache_works(self):
         """В шаблон index настроено кэширование."""
         response = self.authorized_client.get(reverse('posts:index'))
@@ -193,7 +222,8 @@ class PostsPagesTests(TestCase):
         self.assertFalse(Post.objects.filter(text='Тестовый пост').exists())
         response_new = self.authorized_client.get(reverse('posts:index'))
         self.assertEqual(
-            response.context['page_obj'][0].text, response_new.context['page_obj'][0].text)
+            response.context['page_obj'][0].text,
+            response_new.context['page_obj'][0].text)
         self.assertEqual(
             response.content, response_new.content)
         cache.clear()
