@@ -184,18 +184,28 @@ class PostsPagesTests(TestCase):
 
     def test_follow_and_unfollow_works_good(self):
         """пользователь может подписываться на пользователей и удалять их."""
-        Follow.objects.create(author=self.new_user, user=self.user)
+        self.authorized_client.get(
+            reverse('posts:profile_follow', kwargs={'username': self.new_user})
+        )
         counter = Follow.objects.filter(user=self.user).count()
-        Follow.objects.create(author=self.second_user, user=self.user)
+        self.authorized_client.get(
+            reverse('posts:profile_follow', kwargs={
+                    'username': self.second_user})
+        )
         counter_follow = Follow.objects.filter(user=self.user).count()
         self.assertEqual(counter_follow, counter + 1)
-        Follow.objects.filter(author=self.second_user, user=self.user).delete()
+        self.authorized_client.get(
+            reverse('posts:profile_unfollow', kwargs={
+                    'username': self.second_user})
+        )
         counter_unfollow = Follow.objects.filter(user=self.user).count()
         self.assertEqual(counter_unfollow, counter)
 
     def test_follow_page_show_correct_posts(self):
         """В шаблон follow передаются сообщения follower."""
-        Follow.objects.create(author=self.new_user, user=self.user)
+        self.authorized_client.get(
+            reverse('posts:profile_follow', kwargs={'username': self.new_user})
+        )
         post_new = Post.objects.create(
             author=self.new_user,
             text='Новый тестовый пост follow',
@@ -256,7 +266,8 @@ class PaginatorViewsTest(TestCase):
 
     def test_first_index_page_contains_ten_records(self):
         response = self.authorized_client.get(reverse('posts:index'))
-        self.assertEqual(len(response.context['page_obj']), 10)
+        self.assertEqual(
+            len(response.context['page_obj']), settings.POST_COUNT)
 
     def test_second_index_page_contains_three_records(self):
         response = self.authorized_client.get(
@@ -267,7 +278,8 @@ class PaginatorViewsTest(TestCase):
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': self.post.group.slug})
         )
-        self.assertEqual(len(response.context['page_obj']), 10)
+        self.assertEqual(
+            len(response.context['page_obj']), settings.POST_COUNT)
 
     def test_second_group_page_contains_three_records(self):
         response = self.authorized_client.get(
@@ -281,7 +293,8 @@ class PaginatorViewsTest(TestCase):
             reverse('posts:profile', kwargs={
                     'username': self.post.author.username})
         )
-        self.assertEqual(len(response.context['page_obj']), 10)
+        self.assertEqual(
+            len(response.context['page_obj']), settings.POST_COUNT)
 
     def test_second_profile_page_contains_three_records(self):
         response = self.authorized_client.get(

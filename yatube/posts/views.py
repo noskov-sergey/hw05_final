@@ -1,11 +1,10 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import PostForm, CommentForm
 from .models import Follow, Comment, Group, Post, User
-
-POST_COUNT = 10
 
 
 def authorized_only(func):
@@ -20,7 +19,7 @@ def authorized_only(func):
 
 def index(request):
     post_list = Post.objects.select_related('group', 'author').all()
-    paginator = Paginator(post_list, POST_COUNT)
+    paginator = Paginator(post_list, settings.POST_COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -33,7 +32,7 @@ def index(request):
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     post_list = group.groups.select_related('group', 'author').all()
-    paginator = Paginator(post_list, POST_COUNT)
+    paginator = Paginator(post_list, settings.POST_COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -47,7 +46,7 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     user_post_list = Post.objects.select_related(
         'group', 'author').filter(author=user)
-    paginator = Paginator(user_post_list, POST_COUNT)
+    paginator = Paginator(user_post_list, settings.POST_COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     following = (
@@ -71,6 +70,7 @@ def post_detail(request, post_id):
         'post_number': post_number,
         'post': post,
         'comments': comments,
+        # в процессе.
         'form': form,
     }
     return render(request, 'posts/post_detail.html', context)
@@ -128,7 +128,7 @@ def add_comment(request, post_id):
 def follow_index(request):
     post_list_follow = Post.objects.filter(
         author__in=Follow.objects.filter(user=request.user).values('author'))
-    paginator = Paginator(post_list_follow, POST_COUNT)
+    paginator = Paginator(post_list_follow, settings.POST_COUNT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {

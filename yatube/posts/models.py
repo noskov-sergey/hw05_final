@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+
 from core.models import CreatedModel
 
 User = get_user_model()
@@ -12,7 +13,7 @@ class Post(CreatedModel):
         User,
         on_delete=models.CASCADE,
         related_name='posts',
-        verbose_name='Автор',
+        verbose_name='автор',
     )
     group = models.ForeignKey(
         'Group',
@@ -20,7 +21,7 @@ class Post(CreatedModel):
         null=True,
         on_delete=models.SET_NULL,
         related_name='groups',
-        verbose_name='Группа',
+        verbose_name='группа',
         help_text='Группа, которой пренадлежит пост',
     )
     image = models.ImageField(
@@ -30,9 +31,9 @@ class Post(CreatedModel):
     )
 
     class Meta:
-        ordering = ['-created']
-        verbose_name = 'Пост'
-        verbose_name_plural = 'Посты'
+        ordering = ('-created',)
+        verbose_name = 'пост'
+        verbose_name_plural = 'посты'
 
     def __str__(self) -> str:
         return self.text[:15]
@@ -44,8 +45,8 @@ class Group(models.Model):
     description = models.TextField('Описание')
 
     class Meta:
-        verbose_name = 'Группа'
-        verbose_name_plural = 'Группы'
+        verbose_name = 'группу'
+        verbose_name_plural = 'группы'
 
     def __str__(self) -> str:
         return self.title
@@ -72,9 +73,9 @@ class Comment(CreatedModel):
     )
 
     class Meta:
-        ordering = ['-created']
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
+        ordering = ('-created',)
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'комментарии'
 
 
 class Follow(models.Model):
@@ -92,3 +93,15 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         help_text='Подписка на',
     )
+
+    class Meta:
+        verbose_name = 'подписку'
+        verbose_name_plural = 'подписки'
+        unique_together = (
+            ('user', 'author'),
+        )
+        # нашел 2 способа сделать проверку на уникальность
+        # через unique_together и UniqueConstraint
+        # оба работают, даже, когда оба пишешь в Мета - интересно.
+        # по подписке на самого себя - def отдельный делать?
+        # или есть что-то утонченное?

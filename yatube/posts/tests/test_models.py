@@ -1,17 +1,29 @@
 from django.test import TestCase
 
-from posts.models import Group, Post, User
+from posts.models import Comment, Follow, Group, Post, User
 
-FIELDS_VERBOSE = {
+FIELDS_VERBOSE_POST = {
     'text': 'Текст поста',
     'created': 'Дата публикации',
-    'author': 'Автор',
-    'group': 'Группа',
+    'author': 'автор',
+    'group': 'группа',
 }
-FIELDS_HELPS = {
-
+FIELDS_VERBOSE_COMMENT = {
+    'post': 'Пост',
+    'author': 'Автор',
+    'text': 'Текст комментария',
+}
+FIELDS_HELPS_POST = {
     'text': 'Сообщение',
     'group': 'Группа, которой пренадлежит пост',
+}
+FIELDS_VERBOSE_FOLLOW = {
+    'user': 'Подписчик',
+    'author': 'Подписка на',
+}
+FIELDS_HELPS_FOLLOW = {
+    'user': 'Подписчик',
+    'author': 'Подписка на',
 }
 
 
@@ -20,6 +32,7 @@ class PostModelTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
+        cls.user_oleg = User.objects.create_user(username='Олег')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='Тестовый слаг',
@@ -28,6 +41,15 @@ class PostModelTest(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Тестовая группа',
+        )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text='Тестовый коммент',
+        )
+        cls.follow = Follow.objects.create(
+            user=cls.user,
+            author=cls.user_oleg,
         )
 
     def test_models_have_correct_object_names(self):
@@ -39,17 +61,44 @@ class PostModelTest(TestCase):
         self.assertEqual(expected_object_name_group, str(group))
 
     def test_verbose_name(self):
-        """verbose_name в полях совпадает с ожидаемым."""
-        for field, expected_value in FIELDS_VERBOSE.items():
+        """verbose_name post в полях совпадает с ожидаемым."""
+        for field, expected_value in FIELDS_VERBOSE_POST.items():
             with self.subTest(field=field):
                 self.assertEqual(
                     self.post._meta.get_field(field).verbose_name,
                     expected_value
                 )
 
+    def test_verbose_name(self):
+        """verbose_name comment в полях совпадает с ожидаемым."""
+        for field, expected_value in FIELDS_VERBOSE_COMMENT.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    self.comment._meta.get_field(field).verbose_name,
+                    expected_value
+                )
+
     def test_help_text(self):
         """help_text в полях совпадает с ожидаемым."""
-        for field, expected_value in FIELDS_HELPS.items():
+        for field, expected_value in FIELDS_HELPS_POST.items():
             with self.subTest(field=field):
                 self.assertEqual(
                     self.post._meta.get_field(field).help_text, expected_value)
+
+    def test_verbose_name(self):
+        """verbose_name follow в полях совпадает с ожидаемым."""
+        for field, expected_value in FIELDS_VERBOSE_FOLLOW.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    self.follow._meta.get_field(field).verbose_name,
+                    expected_value
+                )
+
+    def test_help_text(self):
+        """help_text follow в полях совпадает с ожидаемым."""
+        for field, expected_value in FIELDS_HELPS_FOLLOW.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    self.follow._meta.get_field(field).help_text,
+                    expected_value
+                )
