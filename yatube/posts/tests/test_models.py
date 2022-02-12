@@ -18,12 +18,12 @@ FIELDS_HELPS_POST = {
     'group': 'Группа, которой пренадлежит пост',
 }
 FIELDS_VERBOSE_FOLLOW = {
-    'user': 'Подписчик',
-    'author': 'Подписка на',
+    'user': 'подписчик',
+    'author': 'подписка на',
 }
 FIELDS_HELPS_FOLLOW = {
-    'user': 'Подписчик',
-    'author': 'Подписка на',
+    'user': 'подписчик',
+    'author': 'подписка на',
 }
 
 

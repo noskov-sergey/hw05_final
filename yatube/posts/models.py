@@ -1,5 +1,9 @@
+
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.dispatch import receiver
 from django.db import models
+from django.db.models.signals import pre_save
 
 
 from core.models import CreatedModel
@@ -82,16 +86,16 @@ class Follow(models.Model):
     user = models.ForeignKey(
         User,
         related_name='follower',
-        verbose_name='Подписчик',
+        verbose_name='подписчик',
         on_delete=models.CASCADE,
-        help_text='Подписчик',
+        help_text='подписчик',
     )
     author = models.ForeignKey(
         User,
         related_name='following',
-        verbose_name='Подписка на',
+        verbose_name='подписка на',
         on_delete=models.CASCADE,
-        help_text='Подписка на',
+        help_text='подписка на',
     )
 
     class Meta:
@@ -100,8 +104,9 @@ class Follow(models.Model):
         unique_together = (
             ('user', 'author'),
         )
-        # нашел 2 способа сделать проверку на уникальность
-        # через unique_together и UniqueConstraint
-        # оба работают, даже, когда оба пишешь в Мета - интересно.
-        # по подписке на самого себя - def отдельный делать?
-        # или есть что-то утонченное?
+
+
+@receiver(pre_save, sender=Follow)
+def check_self_following(sender, instance, **kwargs):
+    if instance.author == instance.user:
+        raise ValidationError('Нельзя подписываться на самого себя')
