@@ -1,3 +1,69 @@
-# hw05_final
+# Проект Yatube.
+***
+Проект Yatube это социальная сеть для ведения дневников.
+Технологии: Python3, Django 2.2LTS, PostgreSQL, gunicorn, nginx, Яндекс.Облако(Ubuntu 18.04), pytest.
+Разработан по классической MVT архитектуре. Используется пагинация постов и кэширование. Регистрация пользователей реализована с верификацией данных, сменой и восстановлением пароля через почту. Написаны тесты, проверяющие работу сервиса.
+***
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+## Возможности.
+
+* Регистрация пользователя.
+* Добавление и редактирование поста.
+* Комментирование поста.
+* Возможность подписки на авторов.
+* Контроль доступа к контенту.
+***
+
+## Установка.
+
+***
+Клонировать репозиторий и перейти в него в командной строке.
+
+```
+git clone git@github.com:noskov-sergey/hw05_final.git
+```
+```
+cd hw05_final
+```
+
+Cоздать и активировать виртуальное окружение:
+
+```
+python3 -m venv venv
+```
+
+```
+source venv/bin/activate
+```
+
+Установить зависимости из файла requirements.txt:
+
+```
+python3 -m pip install --upgrade pip
+```
+
+```
+pip install -r requirements.txt
+```
+
+Выполнить миграции:
+
+```
+python3 manage.py migrate
+```
+
+Запустить проект:
+
+```
+python3 manage.py runserver
+```
+
+Открыть проект в браузере:
+
+```
+http://127.0.0.1:8000/
+```
+
+***
+Автор:
+* Носков Сергей
